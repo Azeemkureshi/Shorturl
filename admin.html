@@ -4,53 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+            margin: 20px;
+        }
+        input, button {
+            display: block;
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+        }
+        button {
+            background: #00d4aa;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+        .movie-list, .ad-list {
+            margin-top: 20px;
+        }
+        .movie-item, .ad-item {
+            border-bottom: 1px solid gray;
+            padding: 10px 0;
+        }
+    </style>
 </head>
 <body>
+
+<div class="container">
     <h2>Admin Panel</h2>
+    
+    <h3>Add Movie</h3>
+    <input type="text" id="title" placeholder="Title">
+    <input type="text" id="imageUrl" placeholder="Image URL">
+    <input type="text" id="watchLink" placeholder="Watch Link">
+    <input type="text" id="downloadLink" placeholder="Download Link">
+    <input type="text" id="genre" placeholder="Genre">
+    <button onclick="addMovie()">Add Movie</button>
 
     <h3>Movies</h3>
-    <form id="movieForm">
-        <input type="text" id="title" placeholder="Title" required>
-        <input type="url" id="image" placeholder="Image URL" required>
-        <input type="url" id="watch" placeholder="Watch Link" required>
-        <input type="url" id="download" placeholder="Download Link" required>
-        <button type="submit">Add Movie</button>
-    </form>
+    <div class="movie-list" id="movieList"></div>
+
+    <h3>Add Ad</h3>
+    <input type="text" id="adImage" placeholder="Ad Image URL">
+    <input type="text" id="adLink" placeholder="Ad Link">
+    <button onclick="addAd()">Add Ad</button>
 
     <h3>Ads</h3>
-    <form id="adForm">
-        <input type="url" id="adImage" placeholder="Ad Image URL" required>
-        <input type="url" id="adLink" placeholder="Ad Link" required>
-        <button type="submit">Add Ad</button>
-    </form>
+    <div class="ad-list" id="adList"></div>
+</div>
 
-    <script>
-        const MOVIES_JSON = "movies.json";
-        const ADS_JSON = "ads.json";
+<script>
+    const GITHUB_USERNAME = "Azeemkureshi";
+    const REPO_NAME = "movie-website";
+    const BRANCH = "main";
+    const MOVIE_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH}/movies.json`;
+    const AD_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH}/ads.json`;
+    const TOKEN = "your_personal_access_token"; // ⚠️ Replace with your GitHub Token
 
-        document.getElementById("movieForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const movie = {
-                title: document.getElementById("title").value,
-                image: document.getElementById("image").value,
-                watch: document.getElementById("watch").value,
-                download: document.getElementById("download").value,
-            };
-            saveData(MOVIES_JSON, movie);
-        });
+    let movies = [];
+    let ads = [];
 
-        document.getElementById("adForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const ad = {
-                image: document.getElementById("adImage").value,
-                link: document.getElementById("adLink").value,
-            };
-            saveData(ADS_JSON, ad);
-        });
+    async function fetchData() {
+        try {
+            let movieRes = await fetch(MOVIE_JSON_URL);
+            let adRes = await fetch(AD_JSON_URL);
 
-        function saveData(filename, newData) {
-            alert(`Manually update ${filename} on GitHub with: ${JSON.stringify(newData)}`);
+            movies = await movieRes.json();
+            ads = await adRes.json();
+
+            displayMovies();
+            displayAds();
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
-    </script>
+    }
+
+    function displayMovies() {
+        let list = document.getElementById("movieList");
+        list.innerHTML = "";
+        movies.forEach((movie, index) => {
+            list.innerHTML += `<div class="movie-item">
+                ${movie.title} - <button onclick="deleteMovie(${index})">Delete</button>
+            </div>`;
+        });
+    }
+
+    function displayAds() {
+        let list = document.getElementById("adList");
+        list.innerHTML = "";
+        ads.forEach((ad, index) => {
+            list.innerHTML += `<div class="ad-item">
+                Ad ${index + 1} - <button onclick="deleteAd(${index})">Delete</button>
+            </div>`;
+        });
+    }
+
+    async function updateJSON(fileName, data) {
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${fileName}`;
+        const getResponse = await fetch(url, {
+            headers: { Authorization: `token ${TOKEN}` }
+        });
+
+        if (!getResponse.ok) {
+            console.error("Error fetching file:", fileName);
+            return;
+        }
+
+        const fileData = await getResponse.json();
+        const sha = fileData.sha;
+
+        const updateResponse = await fetch(url, {
+            method: "PUT",
+            headers: { Authorization: `token ${TOKEN}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message: `Update ${fileName}`,
+                content: btoa(JSON.stringify(data, null, 2)),
+                sha
+            })
+        });
+
+        if (updateResponse.ok) {
+            alert(`${fileName} updated successfully!`);
+            fetchData();
+        } else {
+            console.error("Error updating file:", fileName);
+        }
+    }
+
+    function addMovie() {
+        let title = document.getElementById("title").value;
+        let imageUrl = document.getElementById("imageUrl").value;
+        let watchLink = document.getElementById("watchLink").value;
+        let downloadLink = document.getElementById("downloadLink").value;
+        let genre = document.getElementById("genre").value;
+
+        if (!title || !imageUrl || !watchLink || !downloadLink || !genre) {
+            alert("All fields are required!");
+            return;
+        }
+
+        movies.push({ title, imageUrl, watchLink, downloadLink, genre });
+        updateJSON("movies.json", movies);
+    }
+
+    function addAd() {
+        let adImage = document.getElementById("adImage").value;
+        let adLink = document.getElementById("adLink").value;
+
+        if (!adImage || !adLink) {
+            alert("All fields are required!");
+            return;
+        }
+
+        ads.push({ adImage, adLink });
+        updateJSON("ads.json", ads);
+    }
+
+    function deleteMovie(index) {
+        if (confirm("Are you sure you want to delete this movie?")) {
+            movies.splice(index, 1);
+            updateJSON("movies.json", movies);
+        }
+    }
+
+    function deleteAd(index) {
+        if (confirm("Are you sure you want to delete this ad?")) {
+            ads.splice(index, 1);
+            updateJSON("ads.json", ads);
+        }
+    }
+
+    fetchData();
+</script>
+
 </body>
 </html>
