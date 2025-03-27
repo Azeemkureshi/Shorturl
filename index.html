@@ -16,15 +16,22 @@
             align-items: center;
         }
 
+        /* SEARCH BAR */
         .search-container {
+            position: fixed;
+            top: 0px;
+            left: 0;
             width: 95%;
             padding: 10px;
+            background: transparent;
+            z-index: 1000;
             display: flex;
             align-items: center;
+            box-sizing: border-box;
         }
         .search-box {
             flex: 1;
-            padding: 12px;
+            padding: 12px 15px;
             font-size: 16px;
             background: #333;
             color: white;
@@ -33,22 +40,27 @@
             outline: none;
         }
 
+        /* MOVIE LIST */
         .movie-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
             width: 100%;
             max-width: 800px;
-            margin-top: 10px;
+            margin-top: 50px;
         }
         .movie {
+            border-radius: 10px;
+            overflow: hidden;
             cursor: pointer;
         }
         .movie img {
             width: 100%;
+            display: block;
             border-radius: 8px;
         }
 
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -80,7 +92,9 @@
         .btn {
             flex: 1;
             padding: 10px;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
             font-size: 16px;
         }
         .watch {
@@ -93,24 +107,31 @@
         }
         .close {
             margin-top: 10px;
+            font-size: 16px;
             cursor: pointer;
             color: #ff5c5c;
         }
-
     </style>
 </head>
 <body>
 
+<!-- Search Bar -->
 <div class="search-container">
     <input type="text" class="search-box" id="search" placeholder="Search Movies..." onkeyup="searchMovies()">
 </div>
 
+<!-- Movies Grid -->
 <div class="movie-container" id="movies"></div>
 
+<!-- Movie Popup Modal -->
 <div class="modal" id="movieModal">
     <div class="modal-content">
         <img id="modalImage" src="" alt="">
         <h2 id="modalTitle"></h2>
+        <p id="modalGenre"></p>
+
+        <div id="modalAd"></div>
+
         <div class="buttons">
             <a id="watchLink" class="btn watch" target="_blank">WATCH NOW</a>
             <a id="downloadLink" class="btn download" target="_blank">DOWNLOAD</a>
@@ -120,18 +141,21 @@
 </div>
 
 <script>
-    const MOVIES_URL = "https://raw.githubusercontent.com/Azeemkureshi/your-repo/main/movies.json";
-    const ADS_URL = "https://raw.githubusercontent.com/Azeemkureshi/your-repo/main/ads.json";
+    const MOVIE_JSON_URL = "https://raw.githubusercontent.com/Azeemkureshi/movie-website/main/movies.json";
+    const AD_JSON_URL = "https://raw.githubusercontent.com/Azeemkureshi/movie-website/main/ads.json";
 
-    let moviesData = [];
+    let movieData = [];
     let adsData = [];
 
     async function fetchMoviesAndAds() {
         try {
-            const [moviesRes, adsRes] = await Promise.all([fetch(MOVIES_URL), fetch(ADS_URL)]);
-            moviesData = await moviesRes.json();
-            adsData = await adsRes.json();
-            displayMovies(moviesData);
+            const [movieResponse, adResponse] = await Promise.all([
+                fetch(MOVIE_JSON_URL),
+                fetch(AD_JSON_URL)
+            ]);
+            movieData = await movieResponse.json();
+            adsData = await adResponse.json();
+            displayMovies(movieData);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -142,21 +166,21 @@
     }
 
     function displayMovies(movies) {
-        const movieContainer = document.getElementById("movies");
+        let movieContainer = document.getElementById("movies");
         movieContainer.innerHTML = "";
 
         movies.forEach((movie, index) => {
-            const movieDiv = document.createElement("div");
+            let movieDiv = document.createElement("div");
             movieDiv.classList.add("movie");
-            movieDiv.innerHTML = `<img src="${movie.image}" alt="${movie.title}" onclick="openModal('${movie.title}', '${movie.image}', '${movie.watch}', '${movie.download}')">`;
+            movieDiv.innerHTML = `<img src="${movie.imageUrl}" alt="${movie.title}" onclick="openModal('${movie.title}', '${movie.imageUrl}', '${movie.watchLink}', '${movie.downloadLink}', '${movie.genre}')">`;
             movieContainer.appendChild(movieDiv);
 
             if ((index + 1) % 5 === 0) {
-                const ad = getRandomAd();
-                if (ad) {
-                    const adDiv = document.createElement("div");
+                let randomAd = getRandomAd();
+                if (randomAd) {
+                    let adDiv = document.createElement("div");
                     adDiv.classList.add("movie");
-                    adDiv.innerHTML = `<a href="${ad.link}" target="_blank"><img src="${ad.image}" alt="Ad"></a>`;
+                    adDiv.innerHTML = `<a href="${randomAd.adLink}" target="_blank"><img src="${randomAd.adImage}" alt="Ad"></a>`;
                     movieContainer.appendChild(adDiv);
                 }
             }
@@ -164,16 +188,22 @@
     }
 
     function searchMovies() {
-        const query = document.getElementById("search").value.toLowerCase();
-        const filteredMovies = moviesData.filter(movie => movie.title.toLowerCase().includes(query));
+        let query = document.getElementById("search").value.toLowerCase();
+        let filteredMovies = movieData.filter(movie => movie.title.toLowerCase().includes(query));
         displayMovies(filteredMovies);
     }
 
-    function openModal(title, image, watch, download) {
+    function openModal(title, imageUrl, watchLink, downloadLink, genre) {
         document.getElementById("modalTitle").textContent = title;
-        document.getElementById("modalImage").src = image;
-        document.getElementById("watchLink").href = watch;
-        document.getElementById("downloadLink").href = download;
+        document.getElementById("modalImage").src = imageUrl;
+        document.getElementById("modalGenre").textContent = genre;
+        document.getElementById("watchLink").href = watchLink;
+
+        let randomAd = getRandomAd();
+        if (randomAd) {
+            document.getElementById("modalAd").innerHTML = `<a href="${randomAd.adLink}" target="_blank"><img src="${randomAd.adImage}" style="width:100%;border-radius:10px;"></a>`;
+        }
+
         document.getElementById("movieModal").style.display = "flex";
     }
 
