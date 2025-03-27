@@ -39,8 +39,14 @@
             border-radius: 50px;
             outline: none;
         }
+        .search-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: -40px;
+            cursor: pointer;
+        }
 
-        /* MOVIE LIST */
+        /* MOVIE GRID */
         .movie-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -60,7 +66,26 @@
             border-radius: 8px;
         }
 
-        /* MODAL */
+        /* NO RESULTS FOUND */
+        #noResults {
+            display: none;
+            text-align: center;
+            margin-top: 100px;
+        }
+        #noResults img {
+            width: 150px;
+            display: block;
+            margin: 0 auto;
+        }
+        #noResults h2 {
+            margin: 10px 0;
+            text-align: center;
+        }
+        #noResults p {
+            text-align: center;
+        }
+
+        /* POPUP MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -71,6 +96,7 @@
             background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.3s ease-in-out; /* Added animation */
         }
         .modal-content {
             background: #222;
@@ -79,10 +105,18 @@
             max-width: 400px;
             border-radius: 10px;
             text-align: center;
+            animation: fadeIn 0.3s ease-in-out; /* Added animation */
         }
         .modal img {
             width: 100%;
             border-radius: 10px;
+        }
+        .modal h2 {
+            margin: 10px 0 5px;
+        }
+        .modal p {
+            font-size: 14px;
+            color: #ccc;
         }
         .buttons {
             display: flex;
@@ -111,6 +145,29 @@
             cursor: pointer;
             color: #ff5c5c;
         }
+
+        /* ADS */
+        .ad-iframe {
+            width: 100%;
+            max-width: 800px;
+            height: 80px;
+            border: none;
+            display: block;
+            margin: 10px 0;
+        }
+
+        /* Added Animation Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -118,6 +175,14 @@
 <!-- Search Bar -->
 <div class="search-container">
     <input type="text" class="search-box" id="search" placeholder="Search Movies..." onkeyup="searchMovies()">
+    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjMhMU_U1U48E_DDp0t5Ajd3rt4-9NruJvZ1qZyWuCTqbTvPGc8Gag5CJ8-KoSM6S-NGyKyNyIe4P2QzZqHXFrYTk6EpxHGNtvU7-qaSwbnJhtXpvriobmhJ13fxDqIQv4MTZZNI2eWazgwaWMBuML-kmmmVisKOIdMpjaetft1j8uoyYqR2CaXsVOyzDum/s256/1000342000.png" class="search-icon" alt="Search">
+</div>
+
+<!-- No Results Found Message -->
+<div id="noResults">
+    <img src="https://rukminim3.flixcart.com/www/850/400/promos/04/05/2018/3a392fd0-0a11-4135-b24a-837ae11740ff.png?q=90" alt="No Results">
+    <h2>Result Not Found</h2>
+    <p>This Movie is not available</p>
 </div>
 
 <!-- Movies Grid -->
@@ -130,7 +195,10 @@
         <h2 id="modalTitle"></h2>
         <p id="modalGenre"></p>
 
-        <div id="modalAd"></div>
+        <!-- Modal Ad iframe -->
+        <div id="modalAd">
+            <iframe class="ad-iframe" src="https://azeemkureshi.github.io/website/"></iframe>
+        </div>
 
         <div class="buttons">
             <a id="watchLink" class="btn watch" target="_blank">WATCH NOW</a>
@@ -141,20 +209,25 @@
 </div>
 
 <script>
-    const MOVIE_JSON_URL = "https://raw.githubusercontent.com/Azeemkureshi/movie-website/main/movies.json";
-    const AD_JSON_URL = "https://raw.githubusercontent.com/Azeemkureshi/movie-website/main/ads.json";
+    const MOVIE_SHEET_ID = "10AHA4ahT3oQ-_RmRKH-MhlW1_XDoFMQskpdMsq9GSgo";
+    const AD_SHEET_ID = "1sAsrARX6-gauGu6OPkdiOBVoBlyIbwpBjbHxMm4c-OE";
+    const API_KEY = "AIzaSyC1YPmJGo77go3igvLO4kewd0gdtXKXDRs";
+
+    const MOVIE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${MOVIE_SHEET_ID}/values/Sheet1?key=${API_KEY}`;
+    const AD_URL = `https://sheets.googleapis.com/v4/spreadsheets/${AD_SHEET_ID}/values/Sheet1?key=${API_KEY}`;
 
     let movieData = [];
     let adsData = [];
 
     async function fetchMoviesAndAds() {
         try {
-            const [movieResponse, adResponse] = await Promise.all([
-                fetch(MOVIE_JSON_URL),
-                fetch(AD_JSON_URL)
-            ]);
-            movieData = await movieResponse.json();
-            adsData = await adResponse.json();
+            const [movieResponse, adResponse] = await Promise.all([fetch(MOVIE_URL), fetch(AD_URL)]);
+            const movieDataJson = await movieResponse.json();
+            const adDataJson = await adResponse.json();
+
+            movieData = movieDataJson.values.slice(1);
+            adsData = adDataJson.values.slice(1);
+
             displayMovies(movieData);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -162,7 +235,11 @@
     }
 
     function getRandomAd() {
-        return adsData.length > 0 ? adsData[Math.floor(Math.random() * adsData.length)] : null;
+        if (adsData.length > 0) {
+            let randomIndex = Math.floor(Math.random() * adsData.length);
+            return adsData[randomIndex];
+        }
+        return null;
     }
 
     function displayMovies(movies) {
@@ -170,26 +247,33 @@
         movieContainer.innerHTML = "";
 
         movies.forEach((movie, index) => {
+            let [title, imageUrl, watchLink, downloadLink, genre] = movie;
+
             let movieDiv = document.createElement("div");
             movieDiv.classList.add("movie");
-            movieDiv.innerHTML = `<img src="${movie.imageUrl}" alt="${movie.title}" onclick="openModal('${movie.title}', '${movie.imageUrl}', '${movie.watchLink}', '${movie.downloadLink}', '${movie.genre}')">`;
+            movieDiv.innerHTML = `<img src="${imageUrl}" alt="${title}" onclick="openModal('${title}', '${imageUrl}', '${watchLink}', '${downloadLink}', '${genre}')">`;
             movieContainer.appendChild(movieDiv);
 
+            // Every 5 movies, insert a random ad
             if ((index + 1) % 5 === 0) {
                 let randomAd = getRandomAd();
                 if (randomAd) {
+                    let [adImage, adLink] = randomAd;
+
                     let adDiv = document.createElement("div");
                     adDiv.classList.add("movie");
-                    adDiv.innerHTML = `<a href="${randomAd.adLink}" target="_blank"><img src="${randomAd.adImage}" alt="Ad"></a>`;
+                    adDiv.innerHTML = `<a href="${adLink}" target="_blank"><img src="${adImage}" alt="Ad"></a>`;
                     movieContainer.appendChild(adDiv);
                 }
             }
         });
+
+        document.getElementById("noResults").style.display = movies.length === 0 ? "block" : "none";
     }
 
     function searchMovies() {
         let query = document.getElementById("search").value.toLowerCase();
-        let filteredMovies = movieData.filter(movie => movie.title.toLowerCase().includes(query));
+        let filteredMovies = movieData.filter(movie => movie[0].toLowerCase().includes(query));
         displayMovies(filteredMovies);
     }
 
@@ -199,18 +283,30 @@
         document.getElementById("modalGenre").textContent = genre;
         document.getElementById("watchLink").href = watchLink;
 
+        // Random Ad inside modal
         let randomAd = getRandomAd();
         if (randomAd) {
-            document.getElementById("modalAd").innerHTML = `<a href="${randomAd.adLink}" target="_blank"><img src="${randomAd.adImage}" style="width:100%;border-radius:10px;"></a>`;
+            let [adImage, adLink] = randomAd;
+            document.getElementById("modalAd").innerHTML = `<a href="${adLink}" target="_blank"><img src="${adImage}" style="width:100%;border-radius:10px;"></a>`;
         }
 
+        // Shorten download link
+        fetch(`https://nanolinks.in/api?api=0988c5f0407c29f316166e18523395fd54336707&url=${downloadLink}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("downloadLink").href = data.shortenedUrl;
+            })
+            .catch(() => {
+                document.getElementById("downloadLink").href = downloadLink;
+            });
+
+        // Show modal
         document.getElementById("movieModal").style.display = "flex";
     }
 
     function closeModal() {
         document.getElementById("movieModal").style.display = "none";
-    }
-
+    } 
     fetchMoviesAndAds();
 </script>
 
