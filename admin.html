@@ -4,109 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #222; color: white; text-align: center; padding: 20px; }
-        input, button { margin: 5px; padding: 10px; font-size: 16px; }
-        .movie-list, .ad-list { margin-top: 20px; text-align: left; display: inline-block; width: 90%; }
-        .movie-item, .ad-item { background: #333; padding: 10px; margin: 5px 0; border-radius: 5px; }
-    </style>
 </head>
 <body>
+    <h2>Admin Panel</h2>
 
-    <h2>🎬 Movie Admin Panel</h2>
-    <input type="text" id="title" placeholder="Movie Title">
-    <input type="text" id="image" placeholder="Poster URL">
-    <input type="text" id="watch" placeholder="Watch Link">
-    <input type="text" id="download" placeholder="Download Link">
-    <input type="text" id="genre" placeholder="Genre">
-    <button onclick="addMovie()">Add Movie</button>
+    <h3>Movies</h3>
+    <form id="movieForm">
+        <input type="text" id="title" placeholder="Title" required>
+        <input type="url" id="image" placeholder="Image URL" required>
+        <input type="url" id="watch" placeholder="Watch Link" required>
+        <input type="url" id="download" placeholder="Download Link" required>
+        <button type="submit">Add Movie</button>
+    </form>
 
-    <h3>📜 Movie List</h3>
-    <div class="movie-list" id="movieList"></div>
-
-    <h2>📢 Ads Management</h2>
-    <input type="text" id="adImage" placeholder="Ad Image URL">
-    <input type="text" id="adLink" placeholder="Ad Click URL">
-    <button onclick="addAd()">Add Ad</button>
-
-    <h3>📜 Ad List</h3>
-    <div class="ad-list" id="adList"></div>
+    <h3>Ads</h3>
+    <form id="adForm">
+        <input type="url" id="adImage" placeholder="Ad Image URL" required>
+        <input type="url" id="adLink" placeholder="Ad Link" required>
+        <button type="submit">Add Ad</button>
+    </form>
 
     <script>
-        let movies = [];
-        let ads = [];
+        const MOVIES_JSON = "movies.json";
+        const ADS_JSON = "ads.json";
 
-        async function loadData() {
-            let response = await fetch("movies.json");
-            let data = await response.json();
-            movies = data.movies;
-            ads = data.ads;
-            displayMovies();
-            displayAds();
-        }
-
-        function addMovie() {
-            let movie = {
+        document.getElementById("movieForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const movie = {
                 title: document.getElementById("title").value,
                 image: document.getElementById("image").value,
                 watch: document.getElementById("watch").value,
                 download: document.getElementById("download").value,
-                genre: document.getElementById("genre").value
             };
-            movies.push(movie);
-            saveData();
-        }
+            saveData(MOVIES_JSON, movie);
+        });
 
-        function addAd() {
-            let ad = {
+        document.getElementById("adForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const ad = {
                 image: document.getElementById("adImage").value,
-                link: document.getElementById("adLink").value
+                link: document.getElementById("adLink").value,
             };
-            ads.push(ad);
-            saveData();
-        }
+            saveData(ADS_JSON, ad);
+        });
 
-        function deleteMovie(index) {
-            movies.splice(index, 1);
-            saveData();
+        function saveData(filename, newData) {
+            alert(`Manually update ${filename} on GitHub with: ${JSON.stringify(newData)}`);
         }
-
-        function deleteAd(index) {
-            ads.splice(index, 1);
-            saveData();
-        }
-
-        function displayMovies() {
-            let list = document.getElementById("movieList");
-            list.innerHTML = "";
-            movies.forEach((m, i) => {
-                list.innerHTML += `<div class="movie-item">${m.title} 
-                <button onclick="deleteMovie(${i})">❌</button></div>`;
-            });
-        }
-
-        function displayAds() {
-            let list = document.getElementById("adList");
-            list.innerHTML = "";
-            ads.forEach((a, i) => {
-                list.innerHTML += `<div class="ad-item"><img src="${a.image}" width="50"> 
-                <button onclick="deleteAd(${i})">❌</button></div>`;
-            });
-        }
-
-        async function saveData() {
-            let data = { movies, ads };
-            await fetch("movies.json", {
-                method: "POST", 
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-            displayMovies();
-            displayAds();
-        }
-
-        loadData();
     </script>
-
 </body>
 </html>
