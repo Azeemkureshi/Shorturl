@@ -1,0 +1,10 @@
+[
+    {
+        "adImage": "https://example.com/ad1.jpg",
+        "adLink": "https://example.com/ad1"
+    },
+    {
+        "adImage": "https://example.com/ad2.jpg",
+        "adLink": "https://example.com/ad2"
+    }
+]
