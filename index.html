@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,45 +5,184 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Website</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: white; text-align: center; padding: 10px; }
-        .movie-container { display: flex; flex-wrap: wrap; justify-content: center; }
-        .movie { margin: 10px; width: 150px; cursor: pointer; }
-        .movie img { width: 100%; border-radius: 10px; }
-        .ad { margin: 10px; width: 150px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .search-container {
+            width: 95%;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .search-box {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            outline: none;
+        }
+
+        .movie-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 10px;
+        }
+        .movie {
+            cursor: pointer;
+        }
+        .movie img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #222;
+            padding: 15px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .modal img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .watch {
+            background: #00d4aa;
+            color: white;
+        }
+        .download {
+            background: white;
+            color: black;
+        }
+        .close {
+            margin-top: 10px;
+            cursor: pointer;
+            color: #ff5c5c;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>🎬 Movie Website</h1>
-    <div class="movie-container" id="movies"></div>
+<div class="search-container">
+    <input type="text" class="search-box" id="search" placeholder="Search Movies..." onkeyup="searchMovies()">
+</div>
 
-    <script>
-        async function loadMovies() {
-            let response = await fetch("movies.json");
-            let data = await response.json();
-            let movies = data.movies;
-            let ads = data.ads;
-            let movieContainer = document.getElementById("movies");
-            movieContainer.innerHTML = "";
+<div class="movie-container" id="movies"></div>
 
-            movies.forEach((movie, index) => {
-                let div = document.createElement("div");
-                div.classList.add("movie");
-                div.innerHTML = `<img src="${movie.image}" onclick="window.open('${movie.watch}')">`;
-                movieContainer.appendChild(div);
+<div class="modal" id="movieModal">
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="">
+        <h2 id="modalTitle"></h2>
+        <div class="buttons">
+            <a id="watchLink" class="btn watch" target="_blank">WATCH NOW</a>
+            <a id="downloadLink" class="btn download" target="_blank">DOWNLOAD</a>
+        </div>
+        <div class="close" onclick="closeModal()">Close</div>
+    </div>
+</div>
 
-                if ((index + 1) % 5 === 0 && ads.length > 0) {
-                    let adIndex = Math.floor(Math.random() * ads.length);
-                    let adDiv = document.createElement("div");
-                    adDiv.classList.add("ad");
-                    adDiv.innerHTML = `<a href="${ads[adIndex].link}" target="_blank"><img src="${ads[adIndex].image}"></a>`;
+<script>
+    const MOVIES_URL = "https://raw.githubusercontent.com/Azeemkureshi/your-repo/main/movies.json";
+    const ADS_URL = "https://raw.githubusercontent.com/Azeemkureshi/your-repo/main/ads.json";
+
+    let moviesData = [];
+    let adsData = [];
+
+    async function fetchMoviesAndAds() {
+        try {
+            const [moviesRes, adsRes] = await Promise.all([fetch(MOVIES_URL), fetch(ADS_URL)]);
+            moviesData = await moviesRes.json();
+            adsData = await adsRes.json();
+            displayMovies(moviesData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    function getRandomAd() {
+        return adsData.length > 0 ? adsData[Math.floor(Math.random() * adsData.length)] : null;
+    }
+
+    function displayMovies(movies) {
+        const movieContainer = document.getElementById("movies");
+        movieContainer.innerHTML = "";
+
+        movies.forEach((movie, index) => {
+            const movieDiv = document.createElement("div");
+            movieDiv.classList.add("movie");
+            movieDiv.innerHTML = `<img src="${movie.image}" alt="${movie.title}" onclick="openModal('${movie.title}', '${movie.image}', '${movie.watch}', '${movie.download}')">`;
+            movieContainer.appendChild(movieDiv);
+
+            if ((index + 1) % 5 === 0) {
+                const ad = getRandomAd();
+                if (ad) {
+                    const adDiv = document.createElement("div");
+                    adDiv.classList.add("movie");
+                    adDiv.innerHTML = `<a href="${ad.link}" target="_blank"><img src="${ad.image}" alt="Ad"></a>`;
                     movieContainer.appendChild(adDiv);
                 }
-            });
-        }
-        
-        loadMovies();
-    </script>
+            }
+        });
+    }
+
+    function searchMovies() {
+        const query = document.getElementById("search").value.toLowerCase();
+        const filteredMovies = moviesData.filter(movie => movie.title.toLowerCase().includes(query));
+        displayMovies(filteredMovies);
+    }
+
+    function openModal(title, image, watch, download) {
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("modalImage").src = image;
+        document.getElementById("watchLink").href = watch;
+        document.getElementById("downloadLink").href = download;
+        document.getElementById("movieModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("movieModal").style.display = "none";
+    }
+
+    fetchMoviesAndAds();
+</script>
 
 </body>
 </html>
