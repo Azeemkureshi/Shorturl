@@ -3,150 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Movie Website</title>
+    <title>Admin Panel</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        input {
-            width: 80%;
-            background: #333;
-            color: white;
-        }
-        button {
-            background: #00d4aa;
-            color: white;
-            cursor: pointer;
-        }
-        .list-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .list-container div {
-            background: #222;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .delete-btn {
-            background: red;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; background: #222; color: white; text-align: center; padding: 20px; }
+        input, button { margin: 5px; padding: 10px; font-size: 16px; }
+        .movie-list, .ad-list { margin-top: 20px; text-align: left; display: inline-block; width: 90%; }
+        .movie-item, .ad-item { background: #333; padding: 10px; margin: 5px 0; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>Admin Panel</h1>
-
-    <!-- Movies Form -->
-    <h2>Add New Movie</h2>
-    <input type="text" id="movieTitle" placeholder="Movie Title">
-    <input type="text" id="movieImage" placeholder="Image URL">
-    <input type="text" id="watchLink" placeholder="Watch Link">
-    <input type="text" id="downloadLink" placeholder="Download Link">
+    <h2>🎬 Movie Admin Panel</h2>
+    <input type="text" id="title" placeholder="Movie Title">
+    <input type="text" id="image" placeholder="Poster URL">
+    <input type="text" id="watch" placeholder="Watch Link">
+    <input type="text" id="download" placeholder="Download Link">
+    <input type="text" id="genre" placeholder="Genre">
     <button onclick="addMovie()">Add Movie</button>
 
-    <h2>Movie List</h2>
-    <div class="list-container" id="movieList"></div>
+    <h3>📜 Movie List</h3>
+    <div class="movie-list" id="movieList"></div>
 
-    <hr>
-
-    <!-- Ads Form -->
-    <h2>Add New Ad</h2>
+    <h2>📢 Ads Management</h2>
     <input type="text" id="adImage" placeholder="Ad Image URL">
-    <input type="text" id="adLink" placeholder="Ad Link">
+    <input type="text" id="adLink" placeholder="Ad Click URL">
     <button onclick="addAd()">Add Ad</button>
 
-    <h2>Ad List</h2>
-    <div class="list-container" id="adList"></div>
+    <h3>📜 Ad List</h3>
+    <div class="ad-list" id="adList"></div>
 
     <script>
-        function loadMovies() {
-            let movies = JSON.parse(localStorage.getItem("movies")) || [];
-            let movieList = document.getElementById("movieList");
-            movieList.innerHTML = "";
-            movies.forEach((movie, index) => {
-                movieList.innerHTML += `
-                    <div>
-                        <span>${movie.title}</span>
-                        <button class="delete-btn" onclick="deleteMovie(${index})">Delete</button>
-                    </div>
-                `;
-            });
+        let movies = [];
+        let ads = [];
+
+        async function loadData() {
+            let response = await fetch("movies.json");
+            let data = await response.json();
+            movies = data.movies;
+            ads = data.ads;
+            displayMovies();
+            displayAds();
         }
 
         function addMovie() {
-            let title = document.getElementById("movieTitle").value;
-            let image = document.getElementById("movieImage").value;
-            let watch = document.getElementById("watchLink").value;
-            let download = document.getElementById("downloadLink").value;
-
-            if (title && image && watch && download) {
-                let movies = JSON.parse(localStorage.getItem("movies")) || [];
-                movies.push({ title, image, watch, download });
-                localStorage.setItem("movies", JSON.stringify(movies));
-                loadMovies();
-            }
-        }
-
-        function deleteMovie(index) {
-            let movies = JSON.parse(localStorage.getItem("movies")) || [];
-            movies.splice(index, 1);
-            localStorage.setItem("movies", JSON.stringify(movies));
-            loadMovies();
-        }
-
-        function loadAds() {
-            let ads = JSON.parse(localStorage.getItem("ads")) || [];
-            let adList = document.getElementById("adList");
-            adList.innerHTML = "";
-            ads.forEach((ad, index) => {
-                adList.innerHTML += `
-                    <div>
-                        <span><img src="${ad.image}" width="50"> Ad</span>
-                        <button class="delete-btn" onclick="deleteAd(${index})">Delete</button>
-                    </div>
-                `;
-            });
+            let movie = {
+                title: document.getElementById("title").value,
+                image: document.getElementById("image").value,
+                watch: document.getElementById("watch").value,
+                download: document.getElementById("download").value,
+                genre: document.getElementById("genre").value
+            };
+            movies.push(movie);
+            saveData();
         }
 
         function addAd() {
-            let image = document.getElementById("adImage").value;
-            let link = document.getElementById("adLink").value;
+            let ad = {
+                image: document.getElementById("adImage").value,
+                link: document.getElementById("adLink").value
+            };
+            ads.push(ad);
+            saveData();
+        }
 
-            if (image && link) {
-                let ads = JSON.parse(localStorage.getItem("ads")) || [];
-                ads.push({ image, link });
-                localStorage.setItem("ads", JSON.stringify(ads));
-                loadAds();
-            }
+        function deleteMovie(index) {
+            movies.splice(index, 1);
+            saveData();
         }
 
         function deleteAd(index) {
-            let ads = JSON.parse(localStorage.getItem("ads")) || [];
             ads.splice(index, 1);
-            localStorage.setItem("ads", JSON.stringify(ads));
-            loadAds();
+            saveData();
         }
 
-        loadMovies();
-        loadAds();
+        function displayMovies() {
+            let list = document.getElementById("movieList");
+            list.innerHTML = "";
+            movies.forEach((m, i) => {
+                list.innerHTML += `<div class="movie-item">${m.title} 
+                <button onclick="deleteMovie(${i})">❌</button></div>`;
+            });
+        }
+
+        function displayAds() {
+            let list = document.getElementById("adList");
+            list.innerHTML = "";
+            ads.forEach((a, i) => {
+                list.innerHTML += `<div class="ad-item"><img src="${a.image}" width="50"> 
+                <button onclick="deleteAd(${i})">❌</button></div>`;
+            });
+        }
+
+        async function saveData() {
+            let data = { movies, ads };
+            await fetch("movies.json", {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            displayMovies();
+            displayAds();
+        }
+
+        loadData();
     </script>
 
 </body>
