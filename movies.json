@@ -1,0 +1,17 @@
+{
+    "movies": [
+        {
+            "title": "Avengers: Endgame",
+            "image": "https://image.tmdb.org/t/p/w500/q6725aR8Zs4IwGMXzZT8aC8lh41.jpg",
+            "watch": "https://example.com/watch",
+            "download": "https://example.com/download",
+            "genre": "Action"
+        }
+    ],
+    "ads": [
+        {
+            "image": "https://via.placeholder.com/300x100",
+            "link": "https://example.com/ad"
+        }
+    ]
+}
