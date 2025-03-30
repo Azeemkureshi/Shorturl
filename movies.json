@@ -1,16 +1,32 @@
-[
+{
+  "movies": [
     {
-        "title": "Fast & Furious 9",
-        "imageUrl": "https://example.com/fast9.jpg",
-        "watchLink": "https://example.com/watch1",
-        "downloadLink": "https://example.com/download1",
-        "genre": "Action"
+      "title": "Loot Kaand S01 (2025) Hindi Completed Web Series",
+      "imageUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiSyARpGClsbcv8EVDwdWM6D761uzo1fS8lTVgJjtkBBHHsL_4aeu94ZdWFzg0B3Ou2dUoDY4ZDvSv6KP3f7gFgqExMphynddpDfjeeMmKhz-DAzCsNYhu1nfwN6Xgl2FKohfm8r9OGx94N3WSHvdVXJmD-UI-MGMEVccIDIv9zZ16tklWXP9CTs1eD2BQ/s1280/1000341925.jpg",
+      "watchLink": "https://filmy-degree.blogspot.com/2025/03/blog-post.html?m=1",
+      "downloadLink": "",
+      "genre": "WebSeries"
     },
     {
-        "title": "Avengers: Endgame",
-        "imageUrl": "https://example.com/avengers.jpg",
-        "watchLink": "https://example.com/watch2",
-        "downloadLink": "https://example.com/download2",
-        "genre": "Sci-Fi"
+      "title": "Btack",
+      "imageUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiSyARpGClsbcv8EVDwdWM6D761uzo1fS8lTVgJjtkBBHHsL_4aeu94ZdWFzg0B3Ou2dUoDY4ZDvSv6KP3f7gFgqExMphynddpDfjeeMmKhz-DAzCsNYhu1nfwN6Xgl2FKohfm8r9OGx94N3WSHvdVXJmD-UI-MGMEVccIDIv9zZ16tklWXP9CTs1eD2BQ/s1280/1000341925.jpg",
+      "watchLink": "https://filmy-degree.blogspot.com/2025/03/blog-post.html?m=1",
+      "downloadLink": "",
+      "genre": "no"
+    },
+    {
+      "title": "Ctack",
+      "imageUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiSyARpGClsbcv8EVDwdWM6D761uzo1fS8lTVgJjtkBBHHsL_4aeu94ZdWFzg0B3Ou2dUoDY4ZDvSv6KP3f7gFgqExMphynddpDfjeeMmKhz-DAzCsNYhu1nfwN6Xgl2FKohfm8r9OGx94N3WSHvdVXJmD-UI-MGMEVccIDIv9zZ16tklWXP9CTs1eD2BQ/s1280/1000341925.jpg",
+      "watchLink": "https://filmy-degree.blogspot.com/2025/03/blog-post.html?m=1",
+      "downloadLink": "",
+      "genre": "no"
+    },
+    {
+      "title": "Azeem",
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBk4aClI5mvd0CzaUi8qup1YlXjkhF7JWJrlCMPZNGztwJOQZpQMpQuUc&s=10",
+      "watchLink": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBk4aClI5mvd0CzaUi8qup1YlXjkhF7JWJrlCMPZNGztwJOQZpQMpQuUc&s=10",
+      "downloadLink": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBk4aClI5mvd0CzaUi8qup1YlXjkhF7JWJrlCMPZNGztwJOQZpQMpQuUc&s=10",
+      "genre": "yes"
     }
-]
+  ]
+}
